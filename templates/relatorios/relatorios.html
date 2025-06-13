@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios de Movimentação{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Relatórios de Movimentação de Peças</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <h2>Filtros</h2>
+    <form method="GET" action="{{ url_for('relatorios.relatorios_geral') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
+            <label for="tipo" class="block text-gray-700 text-sm font-bold mb-2">Tipo:</label>
+            <select id="tipo" name="tipo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="Geral" {% if current_filters.tipo == 'Geral' %}selected{% endif %}>Geral</option>
+                <option value="Recebimento" {% if current_filters.tipo == 'Recebimento' %}selected{% endif %}>Recebimento</option>
+                <option value="Expedicao" {% if current_filters.tipo == 'Expedicao' %}selected{% endif %}>Expedição</option>
+            </select>
+        </div>
+        <div>
+            <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Status:</label>
+            <select id="status" name="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="Todos" {% if current_filters.status == 'Todos' %}selected{% endif %}>Todos</option>
+                <option value="Pendente" {% if current_filters.status == 'Pendente' %}selected{% endif %}>Pendente (Recebido, não Expedido)</option>
+                <option value="Concluido" {% if current_filters.status == 'Concluido' %}selected{% endif %}>Concluído (Recebido e Expedido)</option>
+            </select>
+        </div>
+        <div>
+            <label for="id_processa" class="block text-gray-700 text-sm font-bold mb-2">ID Processa:</label>
+            <input type="text" id="id_processa" name="id_processa" value="{{ current_filters.id_processa }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="fornecedor" class="block text-gray-700 text-sm font-bold mb-2">Fornecedor (Nome/CNPJ):</label>
+            <input type="text" id="fornecedor" name="fornecedor" value="{{ current_filters.fornecedor }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="matricula_operador" class="block text-gray-700 text-sm font-bold mb-2">Matrícula do Operador:</label>
+            <input type="text" id="matricula_operador" name="matricula_operador" value="{{ current_filters.matricula_operador }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="turno" class="block text-gray-700 text-sm font-bold mb-2">Turno:</label>
+            <select id="turno" name="turno" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option value="Todos" {% if current_filters.turno == 'Todos' %}selected{% endif %}>Todos</option>
+                <option value="Manhã" {% if current_filters.turno == 'Manhã' %}selected{% endif %}>Manhã</option>
+                <option value="Tarde" {% if current_filters.turno == 'Tarde' %}selected{% endif %}>Tarde</option>
+                <option value="Noite" {% if current_filters.turno == 'Noite' %}selected{% endif %}>Noite</option>
+                <option value="Geral" {% if current_filters.turno == 'Geral' %}selected{% endif %}>Geral</option>
+            </select>
+        </div>
+        <div>
+            <label for="data_inicio" class="block text-gray-700 text-sm font-bold mb-2">Data Início:</label>
+            <input type="date" id="data_inicio" name="data_inicio" value="{{ current_filters.data_inicio }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div>
+            <label for="data_fim" class="block text-gray-700 text-sm font-bold mb-2">Data Fim:</label>
+            <input type="date" id="data_fim" name="data_fim" value="{{ current_filters.data_fim }}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+        </div>
+        <div class="col-span-full flex justify-end space-x-2 mt-4">
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Aplicar Filtros</button>
+            <a href="{{ url_for('relatorios.relatorios_geral') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Limpar Filtros</a>
+        </div>
+    </form>
+</div>
+
+<div class="section mt-6">
+    <h2>Resultados</h2>
+    <div class="flex justify-end mb-4 space-x-2">
+        <a href="{{ url_for('relatorios.export_csv', **current_filters) }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Exportar CSV</a>
+        {# <a href="{{ url_for('relatorios.export_pdf', **current_filters) }}" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Exportar PDF</a> #}
+    </div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b">ID</th>
+                    <th class="py-2 px-4 border-b">Tipo</th>
+                    <th class="py-2 px-4 border-b">Nota DANFE</th>
+                    <th class="py-2 px-4 border-b">Chave de Acesso</th>
+                    <th class="py-2 px-4 border-b">Fornecedor</th>
+                    <th class="py-2 px-4 border-b">Operador</th>
+                    <th class="py-2 px-4 border-b">Turno</th>
+                    <th class="py-2 px-4 border-b">Data</th>
+                    <th class="py-2 px-4 border-b">ID Processa</th>
+                    <th class="py-2 px-4 border-b">Responsável</th>
+                    <th class="py-2 px-4 border-b">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mov in movimentacoes %}
+                <tr class="{% if mov.status == 'Concluido' %}bg-green-50{% elif mov.status == 'Pendente' %}bg-yellow-50{% endif %} hover:bg-gray-100">
+                    <td class="py-2 px-4 border-b">{{ mov.id }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.tipo_movimentacao }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.numero_danfe }}</td>
+                    <td class="py-2 px-4 border-b text-sm">{{ mov.chave_acesso }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.fornecedor.nome if mov.fornecedor else 'N/A' }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.operador.nome_completo if mov.operador else 'N/A' }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.turno }}</td>
+                    <td class="py-2 px-4 border-b text-sm">{{ mov.data_movimentacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.id_processa or 'N/A' }}</td>
+                    <td class="py-2 px-4 border-b">{{ mov.responsavel.nome_completo if mov.responsavel else 'N/A' }}</td>
+                    <td class="py-2 px-4 border-b">
+                        <span class="px-2 py-1 rounded-full text-xs font-semibold
+                            {% if mov.status == 'Concluido' %}bg-green-200 text-green-800
+                            {% elif mov.status == 'Pendente' %}bg-yellow-200 text-yellow-800
+                            {% else %}bg-gray-200 text-gray-800{% endif %}">
+                            {{ mov.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="11" class="py-4 text-center text-gray-500">Nenhuma movimentação encontrada com os filtros aplicados.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

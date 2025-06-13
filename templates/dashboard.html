@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Sistema de Peças{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard do Sistema de Gerenciamento de Peças</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <p>Bem-vindo, **{{ current_user.nome_completo }}**!</p>
+    <p>Sua matrícula: **{{ current_user.matricula }}**</p>
+    <p>Seu tipo de usuário: **{{ current_user.tipo_user }}**</p> {# CORRIGIDO: current_user.tipo_user para current_user.tipo_usuario #}
+
+    <h2 class="mt-8 mb-4 text-xl font-semibold">Navegação Rápida:</h2>
+    <nav>
+        <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <li><a href="{{ url_for('recebimento.recebimento_pecas') }}" class="block bg-blue-500 text-white p-4 rounded-lg shadow hover:bg-blue-600 transition duration-200 text-center">Recebimento de Peças</a></li>
+            <li><a href="{{ url_for('expedicao.expedicao_pecas') }}" class="block bg-yellow-500 text-white p-4 rounded-lg shadow hover:bg-yellow-600 transition duration-200 text-center">Expedição de Peças</a></li>
+            <li><a href="{{ url_for('relatorios.relatorios_geral') }}" class="block bg-green-500 text-white p-4 rounded-lg shadow hover:bg-green-600 transition duration-200 text-center">Relatórios e Dashboards</a></li>
+
+            {% if current_user.tipo_usuario in ['Gestor', 'LSL'] %}
+                <li><a href="{{ url_for('cadastro.cadastro_usuarios') }}" class="block bg-purple-500 text-white p-4 rounded-lg shadow hover:bg-purple-600 transition duration-200 text-center">Cadastro de Usuários</a></li>
+                <li><a href="{{ url_for('cadastro.cadastro_fornecedores') }}" class="block bg-purple-500 text-white p-4 rounded-lg shadow hover:bg-purple-600 transition duration-200 text-center">Cadastro de Fornecedores</a></li>
+                <li><a href="{{ url_for('cadastro.configuracao_emails') }}" class="block bg-purple-500 text-white p-4 rounded-lg shadow hover:bg-purple-600 transition duration-200 text-center">Configuração de E-mails</a></li>
+            {% endif %}
+
+            <li><a href="{{ url_for('auth.logout') }}" class="block bg-gray-500 text-white p-4 rounded-lg shadow hover:bg-gray-600 transition duration-200 text-center">Sair</a></li>
+        </ul>
+    </nav>
+</div>
+{% endblock %}

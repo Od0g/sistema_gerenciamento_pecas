@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastro de Usuários{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Cadastro de Usuários</h1>
+</div>
+
+{% include '_messages.html' %} {# Inclui a exibição das mensagens flash #}
+
+<div class="section">
+    <h2>Cadastrar Novo Usuário</h2>
+    <form method="POST">
+        <label for="nome_completo">Nome Completo:</label>
+        <input type="text" id="nome_completo" name="nome_completo" required>
+
+        <label for="matricula">Matrícula:</label>
+        <input type="text" id="matricula" name="matricula" required>
+
+        <label for="turno">Turno:</label>
+        <select id="turno" name="turno" required>
+            <option value="">Selecione</option>
+            <option value="Manhã">Manhã</option>
+            <option value="Tarde">Tarde</option>
+            <option value="Noite">Noite</option>
+            <option value="Geral">Geral</option>
+        </select>
+
+        <label for="numero_cracha">Número do Crachá (opcional):</label>
+        <input type="text" id="numero_cracha" name="numero_cracha">
+
+        <label for="tipo_usuario">Tipo de Usuário:</label>
+        <select id="tipo_usuario" name="tipo_usuario" required>
+            <option value="">Selecione</option>
+            <option value="Gestor">Gestor</option>
+            <option value="LSL">LSL</option>
+            <option value="DLI">DLI</option>
+            <option value="PQM">PQM</option>
+        </select>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required>
+
+        <button type="submit">Cadastrar Usuário</button>
+    </form>
+</div>
+
+<div class="section user-list">
+    <h2>Usuários Cadastrados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>Tipo</th>
+                <th>Turno</th>
+                <th>E-mail</th>
+                <th>Data Cadastro</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.matricula }}</td>
+                <td>{{ user.nome_completo }}</td>
+                <td>{{ user.tipo_usuario }}</td>
+                <td>{{ user.turno }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.data_cadastro.strftime('%d/%m/%Y %H:%M') }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">Nenhum usuário cadastrado ainda.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

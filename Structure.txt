@@ -1,0 +1,62 @@
+┣ 📜 .env
+ ┣ 📜 app.py
+ ┣ 📜 config.py
+ ┣ 📜 requirements.txt
+ ┣ 📦 instance/
+ ┃ ┗ 📜 database.db  # Para SQLite, se escolhido
+ ┣ 📦 static/
+ ┃ ┣ 📦 css/
+ ┃ ┃ ┗ 📜 style.css
+ ┃ ┣ 📦 js/
+ ┃ ┃ ┗ 📜 scripts.js
+ ┃ ┗ 📦 img/
+ ┣ 📦 templates/
+ ┃ ┣ 📜 base.html
+ ┃ ┣ 📜 login.html
+ ┃ ┣ 📜 dashboard.html
+ ┃ ┣ 📦 recebimento/
+ ┃ ┃ ┣ 📜 recebimento.html
+ ┃ ┃ ┗ 📜 confirmacao_recebimento.html
+ ┃ ┣ 📦 expedicao/
+ ┃ ┃ ┣ 📜 expedicao.html
+ ┃ ┃ ┗ 📜 confirmacao_expedicao.html
+ ┃ ┣ 📦 relatorios/
+ ┃ ┃ ┣ 📜 relatorios.html
+ ┃ ┃ ┗ 📜 dashboard_visual.html
+ ┃ ┣ 📦 cadastro/
+ ┃ ┃ ┣ 📜 cadastro_usuarios.html
+ ┃ ┃ ┣ 📜 cadastro_fornecedores.html
+ ┃ ┃ ┗ 📜 configuracao_emails.html
+ ┃ ┗ 📦 errors/
+ ┃ ┃ ┗ 📜 404.html
+ ┃ ┃ ┗ 📜 500.html
+ ┣ 📦 venv/  # Ambiente virtual (não precisa ser versionado)
+ ┣ 📦 modules/
+ ┃ ┣ 📦 auth/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┣ 📦 core/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┣ 📦 recebimento/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┣ 📦 expedicao/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┣ 📦 relatorios/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┣ 📦 cadastro/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 routes.py
+ ┃ ┃ ┗ 📜 models.py
+ ┃ ┗ 📦 utils/
+ ┃ ┃ ┣ 📜 __init__.py
+ ┃ ┃ ┣ 📜 mail.py
+ ┃ ┃ ┗ 📜 barcode_reader.py

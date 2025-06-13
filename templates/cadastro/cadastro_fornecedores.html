@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastro de Fornecedores{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Cadastro de Fornecedores</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <h2>Cadastrar Novo Fornecedor</h2>
+    <form method="POST">
+        <label for="codigo_fornecedor">Código do Fornecedor:</label>
+        <input type="text" id="codigo_fornecedor" name="codigo_fornecedor" required>
+
+        <label for="nome">Nome do Fornecedor:</label>
+        <input type="text" id="nome" name="nome" required>
+
+        <label for="cnpj">CNPJ:</label>
+        <input type="text" id="cnpj" name="cnpj" pattern="\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}" placeholder="Ex: 00.000.000/0000-00" required>
+
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700">Cadastrar Fornecedor</button>
+    </form>
+</div>
+
+<div class="section supplier-list">
+    <h2>Fornecedores Cadastrados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nome</th>
+                <th>CNPJ</th>
+                <th>Data Inclusão</th>
+                <th>Ações</th> {# <<< NOVA COLUNA #}
+            </tr>
+        </thead>
+        <tbody>
+            {% for fornecedor in fornecedores %}
+            <tr>
+                <td>{{ fornecedor.codigo_fornecedor }}</td>
+                <td>{{ fornecedor.nome }}</td>
+                <td>{{ fornecedor.cnpj }}</td>
+                <td>{{ fornecedor.data_inclusao.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td> {# <<< NOVA CÉLULA PARA AÇÕES #}
+                    <a href="{{ url_for('cadastro.editar_fornecedor', fornecedor_id=fornecedor.id) }}" class="btn btn-edit">Editar</a>
+                    <form action="{{ url_for('cadastro.excluir_fornecedor', fornecedor_id=fornecedor.id) }}" method="POST" style="display:inline-block;">
+                        <button type="submit" class="btn btn-delete" onclick="return confirm('Tem certeza que deseja excluir este fornecedor? Ele não poderá ser excluído se tiver movimentações vinculadas.')">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5">Nenhum fornecedor cadastrado ainda.</td> {# <<< colspan ajustado #}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    /* Adicione estes estilos para os botões de ação na tabela */
+    .btn {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.9em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-right: 5px; /* Espaçamento entre botões */
+    }
+    .btn-edit {
+        background-color: #ffc107; /* yellow-500 */
+        color: black;
+    }
+    .btn-edit:hover {
+        background-color: #e0a800; /* yellow-700 */
+    }
+    .btn-delete {
+        background-color: #dc3545; /* red-600 */
+        color: white;
+        border: none; /* Botões de formulário precisam de border:none */
+    }
+    .btn-delete:hover {
+        background-color: #c82333; /* red-700 */
+    }
+</style>
+{% endblock %}

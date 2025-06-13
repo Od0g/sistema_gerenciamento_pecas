@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Recebimento de Peças (Lote){% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Registro de Recebimento de Peças (Lote)</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <h2>Dados do Recebimento do Lote</h2>
+    <form method="POST">
+        <label for="chaves_acesso">Chaves de Acesso (uma por linha, lidas via leitor de código de barras):</label>
+        <textarea id="chaves_acesso" name="chaves_acesso" rows="10" placeholder="Cole as chaves de acesso aqui (cada chave em uma nova linha)"></textarea>
+        <p class="text-sm text-gray-500 mt-1">Ex: 35240500000000000000550010000000001234567890<br>35240500000000000000550010000000001234567891</p>
+
+        <label for="responsavel_id">Responsável (DLI/PQM):</label>
+        <select id="responsavel_id" name="responsavel_id" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            <option value="">Selecione o Responsável</option>
+            {% for responsavel in responsaveis %}
+                <option value="{{ responsavel.id }}">{{ responsavel.nome_completo }} ({{ responsavel.tipo_usuario }})</option>
+            {% endfor %}
+        </select>
+        
+        <p class="text-sm text-gray-500 mt-1">Matrícula do Operador: **{{ current_user.matricula }}** (Usuário logado)</p>
+        <p class="text-sm text-gray-500 mt-1">Turno do Operador: **{{ current_user.turno }}** (Usuário logado)</p>
+        
+        <button type="submit">Processar Recebimento do Lote</button>
+    </form>
+</div>
+
+{% if process_results %}
+<div class="section mt-6">
+    <h2>Resultados do Processamento do Lote</h2>
+    <table class="min-w-full bg-white border border-gray-200">
+        <thead>
+            <tr>
+                <th class="py-2 px-4 border-b">Chave de Acesso</th>
+                <th class="py-2 px-4 border-b">Status</th>
+                <th class="py-2 px-4 border-b">Mensagem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in process_results %}
+            <tr class="{% if result.status == 'Sucesso' %}bg-green-50{% elif result.status == 'Ignorada' %}bg-yellow-50{% else %}bg-red-50{% endif %} hover:bg-gray-100">
+                <td class="py-2 px-4 border-b text-sm">{{ result.chave }}</td>
+                <td class="py-2 px-4 border-b">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold
+                        {% if result.status == 'Sucesso' %}bg-green-200 text-green-800
+                        {% elif result.status == 'Ignorada' %}bg-yellow-200 text-yellow-800
+                        {% else %}bg-red-200 text-red-800{% endif %}">
+                        {{ result.status }}
+                    </span>
+                </td>
+                <td class="py-2 px-4 border-b">{{ result.mensagem }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<style>
+    /* Inclua aqui os estilos que já tínhamos para .section, form, button, table etc. */
+    .section {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    .section h2 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 1.5em;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+    form label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+    }
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form select,
+    form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    form button {
+        background-color: #28a745;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease;
+    }
+    form button:hover {
+        background-color: #218838;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    table th, table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+    table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}

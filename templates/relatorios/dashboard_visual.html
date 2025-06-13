@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Visual{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Dashboard Visual</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <h2>Visão Geral Gráfica</h2>
+    <p>Aqui serão exibidos os gráficos de movimentação.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">Notas por Fornecedor</h3>
+            <canvas id="chartFornecedores"></canvas>
+            <p class="text-sm text-gray-600 mt-2">Gráfico de barras mostrando a quantidade de notas por fornecedor.</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">Movimentações por Dia/Turno</h3>
+            <canvas id="chartMovimentacoesDiaTurno"></canvas>
+            <p class="text-sm text-gray-600 mt-2">Gráfico de linha mostrando a quantidade de movimentações ao longo do tempo ou por turno.</p>
+        </div>
+        <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+            <h3 class="text-lg font-semibold mb-2">Tempo Médio Recebimento vs Expedição</h3>
+            <p class="text-2xl font-bold text-blue-600 mt-2">-- tempo --</p> {# Placeholder para o KPI #}
+            <p class="text-sm text-gray-600 mt-2">Tempo médio em horas/dias entre o recebimento e a expedição de notas concluídas.</p>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Exemplo de dados (você precisará passar dados reais do Flask)
+    const dataFornecedores = {
+        labels: ['Fornecedor A', 'Fornecedor B', 'Fornecedor C'],
+        datasets: [{
+            label: 'Número de Notas',
+            data: [12, 19, 3],
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.6)',
+                'rgba(54, 162, 235, 0.6)',
+                'rgba(255, 206, 86, 0.6)',
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    const configFornecedores = {
+        type: 'bar',
+        data: dataFornecedores,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        },
+    };
+
+    const chartFornecedores = new Chart(
+        document.getElementById('chartFornecedores'),
+        configFornecedores
+    );
+
+    // Exemplo de dados para Movimentações por Dia/Turno
+    const dataMovimentacoes = {
+        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex'],
+        datasets: [{
+            label: 'Movimentações Diárias',
+            data: [5, 8, 3, 10, 7],
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+
+    const configMovimentacoes = {
+        type: 'line',
+        data: dataMovimentacoes,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    };
+
+    const chartMovimentacoesDiaTurno = new Chart(
+        document.getElementById('chartMovimentacoesDiaTurno'),
+        configMovimentacoes
+    );
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Configuração de E-mails{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Configuração de E-mails Automáticos</h1>
+</div>
+
+{% include '_messages.html' %}
+
+<div class="section">
+    <h2>Configurar Modelo de E-mail</h2>
+    <form method="POST">
+        <label for="tipo_email">Tipo de E-mail:</label>
+        <select id="tipo_email" name="tipo_email" required>
+            <option value="">Selecione</option>
+            <option value="recebimento_gestor">Recebimento (para Gestores)</option>
+            <option value="expedicao_gestor">Expedição (para Gestores)</option>
+            {# Adicione outros tipos de e-mail conforme necessário #}
+        </select>
+
+        <label for="assunto">Assunto do E-mail:</label>
+        <input type="text" id="assunto" name="assunto" required>
+
+        <label for="corpo_template">Corpo do E-mail (use variáveis como {nota}, {chave}, {fornecedor}, {id_processa}):</label>
+        <textarea id="corpo_template" name="corpo_template" rows="10" required>
+Prezado(a) Gestor,
+
+[TIPO_EMAIL] registrada no Sistema de Gerenciamento de Peças:
+
+Detalhes:
+- NF: {nota}
+- Chave de Acesso: {chave}
+- Fornecedor: {fornecedor}
+{% if tipo_email == 'expedicao_gestor' %}
+- ID Processa: {id_processa}
+{% endif %}
+- Operador: {operador} ({matricula_operador})
+- Data/Hora: {data_hora}
+
+Atenciosamente,
+Sistema de Gerenciamento de Peças
+        </textarea>
+
+        <button type="submit">Salvar Configuração</button>
+    </form>
+</div>
+
+<div class="section email-config-list">
+    <h2>Modelos de E-mail Configurados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo de E-mail</th>
+                <th>Assunto</th>
+                <th>Corpo do Template (trecho)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for config in configs %}
+            <tr>
+                <td>{{ config.tipo_email }}</td>
+                <td>{{ config.assunto }}</td>
+                <td>{{ config.corpo_template[:100] }}...</td> {# Exibe apenas os primeiros 100 caracteres #}
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3">Nenhuma configuração de e-mail cadastrada ainda.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
