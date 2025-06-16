@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, current_app # <<< ADICIONE current_app AQUI
 from flask_login import login_required, current_user
 from app import db, mail # Importa a instância do SQLAlchemy e Flask-Mail
 from modules.core.models import Movimentacao, Fornecedor, ConfiguracaoEmail # Importa os modelos
@@ -121,7 +121,7 @@ def expedicao_pecas():
         
         # Enviar e-mail após processar todas as notas no lote
         if emails_to_send_data:
-            send_expedicao_email(emails_to_send_data)
+            send_expedicao_email(emails_to_send_data, id_processa)
         
         # Flash message consolidada para o lote
         success_count = sum(1 for r in process_results if r['status'] == 'Sucesso')
@@ -133,7 +133,7 @@ def expedicao_pecas():
     return render_template('expedicao/expedicao.html')
 
 
-def send_expedicao_email(movimentacoes_list):
+def send_expedicao_email(movimentacoes_list, id_processa):
     email_config = ConfiguracaoEmail.query.filter_by(tipo_email='expedicao_gestor').first()
     if not email_config:
         print("Aviso: Configuração de e-mail de expedição para gestores não encontrada.")
@@ -163,24 +163,34 @@ def send_expedicao_email(movimentacoes_list):
                                    .replace('{matricula_operador}', matricula_operador) \
                                    .replace('{id_processa}', id_processa) \
                                    .replace('{data_hora}', data_hora_lote) \
-                                   .replace('{responsavel}', 'N/A (Expedição)') # Não aplicável como responsável selecionável para expedição
+                                   .replace('{responsavel}', 'N/A (Expedição)')
 
-    # Inserir a lista detalhada de notas se o corpo do template permitir
     corpo_formatado = corpo_formatado.replace('Detalhes:', 'Notas Processadas:\n' + '\n'.join(email_body_notes) + '\nDetalhes do Lote:')
 
 
     gestores_emails = [user.email for user in User.query.filter_by(tipo_usuario='Gestor').all()]
     
-    if not gestores_emails:
-        print("Aviso: Nenhum gestor encontrado para enviar e-mail de expedição de lote.")
-        flash("Aviso: Nenhum gestor encontrado para enviar e-mail de expedição de lote.", "warning")
+    # Adicionar destinatários adicionais do campo configurado
+    destinatarios_adicionais = []
+    if email_config.destinatarios_adicionais:
+        destinatarios_adicionais = [email.strip() for email in email_config.destinatarios_adicionais.split(',') if email.strip()]
+    
+    all_recipients = list(set(gestores_emails + destinatarios_adicionais)) # Remove duplicatas
+
+    if not all_recipients:
+        print("Aviso: Nenhum destinatário configurado para enviar e-mail de expedição de lote.")
+        flash("Aviso: Nenhum destinatário configurado para enviar e-mail de expedição de lote.", "warning")
         return
 
     try:
-        msg = Message(assunto, recipients=gestores_emails)
-        msg.body = corpo_formatado
-        mail.send(msg)
-        print(f"E-mail de expedição de lote enviado para: {', '.join(gestores_emails)}")
+        mail_instance = current_app.extensions.get('mail') # Acessa a instância do Flask-Mail corretamente
+        if mail_instance:
+            msg = Message(assunto, recipients=all_recipients)
+            msg.body = corpo_formatado
+            mail_instance.send(msg)
+            print(f"E-mail de expedição de lote enviado para: {', '.join(all_recipients)}")
+        else:
+            print("Erro: A extensão 'mail' não está configurada ou acessível.")
     except Exception as e:
         print(f"Erro ao enviar e-mail de expedição de lote: {str(e)}")
         flash(f"Erro ao enviar e-mail de expedição de lote: {str(e)}", "warning")

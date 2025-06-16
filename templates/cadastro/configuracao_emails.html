@@ -13,25 +13,26 @@
     <h2>Configurar Modelo de E-mail</h2>
     <form method="POST">
         <label for="tipo_email">Tipo de E-mail:</label>
-        <select id="tipo_email" name="tipo_email" required>
+        <select id="tipo_email" name="tipo_email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
             <option value="">Selecione</option>
-            <option value="recebimento_gestor">Recebimento (para Gestores)</option>
-            <option value="expedicao_gestor">Expedição (para Gestores)</option>
+            <option value="recebimento_gestor">Recebimento (para Gestores Padrão)</option>
+            <option value="expedicao_gestor">Expedição (para Gestores Padrão)</option>
+            <option value="recebimento_atraso_gestor">Alerta de Atraso (para Gestores Padrão)</option> {# Novo tipo para o alerta #}
             {# Adicione outros tipos de e-mail conforme necessário #}
         </select>
 
         <label for="assunto">Assunto do E-mail:</label>
-        <input type="text" id="assunto" name="assunto" required>
+        <input type="text" id="assunto" name="assunto" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 
         <label for="corpo_template">Corpo do E-mail (use variáveis como {nota}, {chave}, {fornecedor}, {id_processa}):</label>
-        <textarea id="corpo_template" name="corpo_template" rows="10" required>
+        <textarea id="corpo_template" name="corpo_template" rows="10" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 Prezado(a) Gestor,
 
 [TIPO_EMAIL] registrada no Sistema de Gerenciamento de Peças:
 
 Detalhes:
 - NF: {nota}
-- Chave de Acesso: {chave}
+- Chave: {chave}
 - Fornecedor: {fornecedor}
 {% if tipo_email == 'expedicao_gestor' %}
 - ID Processa: {id_processa}
@@ -39,11 +40,15 @@ Detalhes:
 - Operador: {operador} ({matricula_operador})
 - Data/Hora: {data_hora}
 
-Atenciosamente,
+Att.,
 Sistema de Gerenciamento de Peças
         </textarea>
 
-        <button type="submit">Salvar Configuração</button>
+        <label for="destinatarios_adicionais">Destinatários Adicionais (separados por vírgula):</label>
+        <input type="text" id="destinatarios_adicionais" name="destinatarios_adicionais" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="email1@exemplo.com, email2@exemplo.com">
+        <p class="text-sm text-gray-500 mt-1">E-mails adicionais que receberão esta notificação, além dos gestores padrões.</p>
+
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Salvar Configuração</button>
     </form>
 </div>
 
@@ -55,6 +60,7 @@ Sistema de Gerenciamento de Peças
                 <th>Tipo de E-mail</th>
                 <th>Assunto</th>
                 <th>Corpo do Template (trecho)</th>
+                <th>Destinatários Adicionais</th> {# <<< NOVA COLUNA NA TABELA #}
             </tr>
         </thead>
         <tbody>
@@ -62,11 +68,12 @@ Sistema de Gerenciamento de Peças
             <tr>
                 <td>{{ config.tipo_email }}</td>
                 <td>{{ config.assunto }}</td>
-                <td>{{ config.corpo_template[:100] }}...</td> {# Exibe apenas os primeiros 100 caracteres #}
+                <td>{{ config.corpo_template[:100] }}...</td>
+                <td>{{ config.destinatarios_adicionais or 'Nenhum' }}</td> {# <<< EXIBE NOVO CAMPO #}
             </tr>
             {% else %}
             <tr>
-                <td colspan="3">Nenhuma configuração de e-mail cadastrada ainda.</td>
+                <td colspan="4">Nenhuma configuração de e-mail cadastrada ainda.</td> {# <<< colspan ajustado #}
             </tr>
             {% endfor %}
         </tbody>

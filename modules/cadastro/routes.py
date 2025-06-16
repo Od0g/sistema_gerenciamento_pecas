@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app import db # Importa a instância do SQLAlchemy
 from modules.auth.models import User # Para cadastrar e gerenciar usuários
-from modules.core.models import Fornecedor, ConfiguracaoEmail # Para outros cadastros
+from modules.core.models import Fornecedor, ConfiguracaoEmail, Movimentacao # Para outros cadastros
 from werkzeug.security import generate_password_hash # Para hashing de senhas
 from sqlalchemy.exc import IntegrityError # Para lidar com erros de unicidade
 
@@ -15,8 +15,8 @@ def has_permission(user, allowed_roles):
 @cadastro.route('/cadastro/usuarios', methods=['GET', 'POST'])
 @login_required
 def cadastro_usuarios():
-    # Verifica se o usuário tem permissão (Gestor ou LSL)
-    if not has_permission(current_user, ['Gestor', 'LSL']):
+    # Verifica se o usuário tem permissão (APENAS Gestor)
+    if not has_permission(current_user, ['Gestor']): # <--- ALTERADO AQUI
         flash('Você não tem permissão para acessar esta página.', 'danger')
         return redirect(url_for('home'))
 
@@ -173,7 +173,6 @@ def excluir_fornecedor(fornecedor_id):
 @cadastro.route('/cadastro/emails', methods=['GET', 'POST'])
 @login_required
 def configuracao_emails():
-    # Verifica se o usuário tem permissão (Gestor ou LSL)
     if not has_permission(current_user, ['Gestor', 'LSL']):
         flash('Você não tem permissão para acessar esta página.', 'danger')
         return redirect(url_for('home'))
@@ -182,9 +181,10 @@ def configuracao_emails():
         tipo_email = request.form.get('tipo_email')
         assunto = request.form.get('assunto')
         corpo_template = request.form.get('corpo_template')
+        destinatarios_adicionais = request.form.get('destinatarios_adicionais') # <<< PEGA NOVO CAMPO
 
         if not all([tipo_email, assunto, corpo_template]):
-            flash('Todos os campos devem ser preenchidos.', 'danger')
+            flash('Todos os campos obrigatórios (Tipo, Assunto, Corpo) devem ser preenchidos.', 'danger') # Adicionado "obrigatórios"
             return render_template('cadastro/configuracao_emails.html', configs=ConfiguracaoEmail.query.all())
 
         config = ConfiguracaoEmail.query.filter_by(tipo_email=tipo_email).first()
@@ -192,12 +192,14 @@ def configuracao_emails():
             if config:
                 config.assunto = assunto
                 config.corpo_template = corpo_template
+                config.destinatarios_adicionais = destinatarios_adicionais # <<< SALVA NOVO CAMPO
                 flash(f'Configuração de e-mail "{tipo_email}" atualizada com sucesso!', 'success')
             else:
                 new_config = ConfiguracaoEmail(
                     tipo_email=tipo_email,
                     assunto=assunto,
-                    corpo_template=corpo_template
+                    corpo_template=corpo_template,
+                    destinatarios_adicionais=destinatarios_adicionais # <<< SALVA NOVO CAMPO
                 )
                 db.session.add(new_config)
                 flash(f'Configuração de e-mail "{tipo_email}" adicionada com sucesso!', 'success')

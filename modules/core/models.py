@@ -51,6 +51,8 @@ class ConfiguracaoEmail(db.Model):
     tipo_email = db.Column(db.String(50), unique=True, nullable=False)
     assunto = db.Column(db.String(255), nullable=False)
     corpo_template = db.Column(db.Text, nullable=False)
+    destinatarios_adicionais = db.Column(db.Text, nullable=True) # <<< NOVA COLUNA: Lista de e-mails separados por vírgula
 
     def __repr__(self):
         return f'<ConfiguracaoEmail {self.tipo_email}>'
+
