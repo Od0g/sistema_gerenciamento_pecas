@@ -4,42 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Gerenciamento de Peças{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
-    <header class="bg-blue-600 text-white p-4 shadow-md">
+    <header class="bg-blue-800 text-white p-4 shadow-md"> {# Cor mais escura para o header #}
         <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">
-                <a href="{{ url_for('home') }}" class="text-white no-underline">Sistema de Peças</a>
+            <h1 class="text-3xl font-bold"> {# Fonte maior para o título #}
+                <a href="{{ url_for('home') }}" class="text-white no-underline hover:text-blue-200">Sistema de Peças</a>
             </h1>
             <nav>
                 <ul class="flex space-x-4 items-center">
                     {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('home') }}" class="hover:underline">Dashboard</a></li>
+                        <li><a href="{{ url_for('home') }}" class="hover:bg-blue-700">Dashboard</a></li>
 
                         {% if current_user.tipo_usuario in ['Gestor', 'LSL'] %}
                         <li class="relative group">
-                            <a href="#" class="hover:underline">Cadastro</a>
-                            <ul class="absolute hidden group-hover:block bg-blue-700 text-white p-2 rounded shadow-lg z-10 whitespace-nowrap">
-                                <li><a href="{{ url_for('cadastro.cadastro_usuarios') }}" class="block p-2 hover:bg-blue-800">Usuários</a></li>
-                                <li><a href="{{ url_for('cadastro.cadastro_fornecedores') }}" class="block p-2 hover:bg-blue-800">Fornecedores</a></li>
-                                <li><a href="{{ url_for('cadastro.configuracao_emails') }}" class="block p-2 hover:bg-blue-800">Config E-mails</a></li>
+                            <a href="#" class="hover:bg-blue-700">Cadastro</a>
+                            <ul class="absolute hidden group-hover:block bg-blue-700 text-white p-2 rounded shadow-lg z-10 whitespace-nowrap top-full left-0"> {# top-full para alinhamento #}
+                                <li><a href="{{ url_for('cadastro.cadastro_usuarios') }}" class="block p-2 hover:bg-blue-600">Usuários</a></li>
+                                <li><a href="{{ url_for('cadastro.cadastro_fornecedores') }}" class="block p-2 hover:bg-blue-600">Fornecedores</a></li>
+                                <li><a href="{{ url_for('cadastro.configuracao_emails') }}" class="block p-2 hover:bg-blue-600">Config E-mails</a></li>
                             </ul>
                         </li>
                         {% endif %}
 
-                        <li><a href="{{ url_for('recebimento.recebimento_pecas') }}" class="hover:underline">Recebimento de Peças</a></li>
-                        <li><a href="{{ url_for('expedicao.expedicao_pecas') }}" class="hover:underline">Expedição de Peças</a></li>
-                        <li><a href="{{ url_for('relatorios.relatorios_geral') }}" class="hover:underline">Relatórios e Dashboards</a></li>
-                        <li><a href="{{ url_for('auth.logout') }}" class="hover:underline">Sair ({{ current_user.matricula }})</a></li>
+                        <li><a href="{{ url_for('recebimento.recebimento_pecas') }}" class="hover:bg-blue-700">Recebimento</a></li>
+                        <li><a href="{{ url_for('expedicao.expedicao_pecas') }}" class="hover:bg-blue-700">Expedição</a></li>
+                        <li><a href="{{ url_for('relatorios.relatorios_geral') }}" class="hover:bg-blue-700">Relatórios</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md transition-colors duration-200">Sair ({{ current_user.matricula }})</a></li> {# Botão de sair estilizado #}
                     {% endif %}
                 </ul>
             </nav>
         </div>
     </header>
 
-    <main class="container mx-auto mt-6 p-4 bg-white rounded shadow-lg">
+    <main class="container mx-auto mt-6 p-4 bg-white rounded shadow-lg min-h-screen"> {# min-h-screen para empurrar o footer #}
+        {% include '_messages.html' %} {# O include de mensagens deve estar aqui #}
         {% block content %}{% endblock %}
     </main>
 

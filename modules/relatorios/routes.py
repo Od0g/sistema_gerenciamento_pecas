@@ -150,8 +150,67 @@ def export_csv():
     output.headers["Content-type"] = "text/csv"
     return output
 
-# Rota para Dashboards visuais (ainda não implementaremos os gráficos aqui, apenas o template)
-@relatorios.route('/dashboard_visual')
+# Rota para Dashboards visuais 
+@relatorios.route('/dashboard_visual', methods=['GET']) # Adicione methods=['GET']
 @login_required
 def dashboard_visual():
-    return render_template('relatorios/dashboard_visual.html')
+    # Permissões: Somente Gestores e LSL podem ver dashboards visuais
+    if not current_user.tipo_usuario in ['Gestor', 'LSL']:
+        flash('Você não tem permissão para acessar esta página de dashboard.', 'danger')
+        return redirect(url_for('home'))
+
+    # Dados para "Notas por Fornecedor"
+    # Contagem de movimentações (recebimento ou expedição) por fornecedor
+    movimentacoes_por_fornecedor = db.session.query(
+        Fornecedor.nome,
+        db.func.count(Movimentacao.id)
+    ).join(Movimentacao).group_by(Fornecedor.nome).all()
+
+    labels_fornecedores = [item[0] for item in movimentacoes_por_fornecedor]
+    data_fornecedores = [item[1] for item in movimentacoes_por_fornecedor]
+
+    # Dados para "Movimentações por Dia/Turno"
+    # Contagem de movimentações por dia (últimos 7 dias, por exemplo)
+    sete_dias_atras = datetime.now() - timedelta(days=7)
+    movimentacoes_por_dia = db.session.query(
+        db.func.date(Movimentacao.data_movimentacao),
+        db.func.count(Movimentacao.id)
+    ).filter(Movimentacao.data_movimentacao >= sete_dias_atras).group_by(db.func.date(Movimentacao.data_movimentacao)).order_by(db.func.date(Movimentacao.data_movimentacao)).all()
+
+    labels_dias = [item[0].strftime('%d/%m') for item in movimentacoes_por_dia]
+    data_dias = [item[1] for item in movimentacoes_por_dia]
+
+    # Dados para "Tempo Médio entre Recebimento e Expedição"
+    # Apenas para movimentações 'Concluido' (recebidas e expedidas)
+    tempos_entre_mov = db.session.query(Movimentacao).filter(
+        Movimentacao.status == 'Concluido',
+        Movimentacao.tipo_movimentacao == 'Expedicao' # Garante que estamos pegando a data da expedição
+    ).all()
+
+    total_diff_seconds = 0
+    count_concluidas = 0
+
+    for mov_expedicao in tempos_entre_mov:
+        # Encontra a movimentação de recebimento correspondente pela chave de acesso
+        mov_recebimento = Movimentacao.query.filter(
+            Movimentacao.chave_acesso == mov_expedicao.chave_acesso,
+            Movimentacao.tipo_movimentacao == 'Recebimento'
+        ).first()
+
+        if mov_recebimento and mov_recebimento.data_movimentacao and mov_expedicao.data_movimentacao:
+            time_diff = mov_expedicao.data_movimentacao - mov_recebimento.data_movimentacao
+            total_diff_seconds += time_diff.total_seconds()
+            count_concluidas += 1
+
+    tempo_medio_horas = 0
+    if count_concluidas > 0:
+        tempo_medio_horas = (total_diff_seconds / count_concluidas) / 3600 # Converter para horas
+
+    tempo_medio_str = f"{tempo_medio_horas:.2f} horas" if tempo_medio_horas > 0 else "N/A"
+    
+    return render_template('relatorios/dashboard_visual.html',
+                           labels_fornecedores=labels_fornecedores,
+                           data_fornecedores=data_fornecedores,
+                           labels_dias=labels_dias,
+                           data_dias=data_dias,
+                           tempo_medio_str=tempo_medio_str)
