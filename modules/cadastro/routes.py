@@ -64,6 +64,49 @@ def cadastro_usuarios():
     users = User.query.all() # Busca todos os usuários para exibir na lista
     return render_template('cadastro/cadastro_usuarios.html', users=users)
 
+# NOVA ROTA: Excluir Usuário
+@cadastro.route('/cadastro/usuarios/excluir/<int:user_id>', methods=['POST'])
+@login_required
+def excluir_usuario(user_id):
+    # Verifica se o usuário logado é um Gestor (apenas Gestores podem excluir outros usuários)
+    if not has_permission(current_user, ['Gestor']):
+        flash('Você não tem permissão para realizar esta operação.', 'danger')
+        return redirect(url_for('home'))
+
+    user_to_delete = User.query.get_or_404(user_id)
+
+    # Prevenções de Segurança Cruciais:
+    # 1. Impedir que um usuário exclua a si mesmo
+    if user_to_delete.id == current_user.id:
+        flash('Você não pode excluir sua própria conta!', 'danger')
+        return redirect(url_for('cadastro.cadastro_usuarios'))
+
+    # 2. Impedir exclusão do último Gestor (para evitar bloqueio do sistema)
+    # Primeiro, conte quantos gestores existem
+    num_gestores = User.query.filter_by(tipo_usuario='Gestor').count()
+    if user_to_delete.tipo_usuario == 'Gestor' and num_gestores <= 1:
+        flash('Não é possível excluir o último usuário Gestor. Crie outro Gestor primeiro, se necessário.', 'danger')
+        return redirect(url_for('cadastro.cadastro_usuarios'))
+
+    # 3. Verificar se o usuário tem movimentações vinculadas (opcional, mas boa prática)
+    # Se um usuário tem registros de Movimentacao, excluí-lo pode quebrar o histórico
+    # Decisão: permitir exclusão mesmo com movimentações, mas avisar ou considerar desativar em vez de excluir
+    # Por enquanto, vamos permitir a exclusão, mas em sistemas reais, isso é um ponto de atenção.
+    # Exemplo de verificação:
+    # if Movimentacao.query.filter_by(matricula_operador=user_to_delete.matricula).first():
+    #    flash('Não é possível excluir o usuário pois ele possui movimentações registradas. Considere desativá-lo.', 'danger')
+    #    return redirect(url_for('cadastro.cadastro_usuarios'))
+
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash(f'Usuário "{user_to_delete.nome_completo}" excluído com sucesso!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao excluir usuário: {str(e)}', 'danger')
+
+    return redirect(url_for('cadastro.cadastro_usuarios'))
+
 
 @cadastro.route('/cadastro/fornecedores', methods=['GET', 'POST'])
 @login_required

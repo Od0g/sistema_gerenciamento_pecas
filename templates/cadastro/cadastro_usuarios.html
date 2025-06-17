@@ -13,13 +13,13 @@
     <h2>Cadastrar Novo Usuário</h2>
     <form method="POST">
         <label for="nome_completo">Nome Completo:</label>
-        <input type="text" id="nome_completo" name="nome_completo" required>
+        <input type="text" id="nome_completo" name="nome_completo" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 
         <label for="matricula">Matrícula:</label>
-        <input type="text" id="matricula" name="matricula" required>
+        <input type="text" id="matricula" name="matricula" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 
         <label for="turno">Turno:</label>
-        <select id="turno" name="turno" required>
+        <select id="turno" name="turno" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
             <option value="">Selecione</option>
             <option value="Manhã">Manhã</option>
             <option value="Tarde">Tarde</option>
@@ -28,10 +28,10 @@
         </select>
 
         <label for="numero_cracha">Número do Crachá (opcional):</label>
-        <input type="text" id="numero_cracha" name="numero_cracha">
+        <input type="text" id="numero_cracha" name="numero_cracha" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
 
         <label for="tipo_usuario">Tipo de Usuário:</label>
-        <select id="tipo_usuario" name="tipo_usuario" required>
+        <select id="tipo_usuario" name="tipo_usuario" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
             <option value="">Selecione</option>
             <option value="Gestor">Gestor</option>
             <option value="LSL">LSL</option>
@@ -40,12 +40,12 @@
         </select>
 
         <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 
         <label for="senha">Senha:</label>
-        <input type="password" id="senha" name="senha" required>
+        <input type="password" id="senha" name="senha" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
 
-        <button type="submit">Cadastrar Usuário</button>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700">Cadastrar Usuário</button>
     </form>
 </div>
 
@@ -60,6 +60,7 @@
                 <th>Turno</th>
                 <th>E-mail</th>
                 <th>Data Cadastro</th>
+                <th>Ações</th> {# <<< NOVA COLUNA #}
             </tr>
         </thead>
         <tbody>
@@ -71,10 +72,25 @@
                 <td>{{ user.turno }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.data_cadastro.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td> {# <<< NOVA CÉLULA PARA AÇÕES #}
+                    {# Apenas Gestores podem excluir, e não podem excluir a si mesmos ou o último Gestor #}
+                    {% if current_user.tipo_usuario == 'Gestor' and user.id != current_user.id %}
+                        {% if user.tipo_usuario != 'Gestor' or users|selectattr('tipo_usuario', 'equalto', 'Gestor')|list|length > 1 %}
+                            <form action="{{ url_for('cadastro.excluir_usuario', user_id=user.id) }}" method="POST" style="display:inline-block;">
+                                <button type="submit" class="btn btn-delete" onclick="return confirm('Tem certeza que deseja excluir o usuário {{ user.nome_completo }} ({{ user.matricula }})?')">Excluir</button>
+                            </form>
+                        {% else %}
+                            <span class="text-gray-400 text-sm" title="Não é possível excluir o último Gestor.">Não Excluir</span>
+                        {% endif %}
+                    {% else %}
+                        {# Se não for Gestor ou se for o próprio usuário #}
+                        <span class="text-gray-400 text-sm">N/A</span>
+                    {% endif %}
+                </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="6">Nenhum usuário cadastrado ainda.</td>
+                <td colspan="7">Nenhum usuário cadastrado ainda.</td> {# <<< colspan ajustado #}
             </tr>
             {% endfor %}
         </tbody>
